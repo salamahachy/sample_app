@@ -26,6 +26,39 @@ describe "User Pages" do
         end
       end
     end
+    
+    describe "delete links" do
+      
+      it { should_not have_link('delete') }
+      
+      describe "as an admin user" do
+        let(:admin) { FactoryGirl.create(:admin) }
+        before do
+          sign_in admin
+          visit users_path
+        end
+        
+        it { should have_link('delete', href: user_path(User.first)) }
+        it "should be able to delete another user" do
+          expect do
+            click_link('delete', match: :first)
+          end.to change(User, :count).by(-1)
+        end
+        it { should_not have_link('delete', href: user_path(admin))}
+      end 
+      
+      describe "as non-admin user" do
+        let(:user) { FactoryGirl.create(:user) }
+        let(:non_admin) { FactoryGirl.create(:user) }
+        
+        before {sign_in non_admin, no_capybara: true }
+        
+        describe "submitting DELETE request to the Users#destroy action" do
+          before { delete user_path(user) }
+          specify { expect(response).to redirect_to(root_url) }
+        end
+      end
+    end
   end
   
   describe "signup page" do
