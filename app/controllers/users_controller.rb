@@ -1,7 +1,8 @@
 class UsersController < ApplicationController
-  before_action :signed_in_user, only: [:edit, :update, :index, :destroy]
-  before_action :correct_user,   only: [:edit, :update]
-  before_action :admin_user,     only: :destroy
+  before_action :signed_in_user,       only: [:edit, :update, :index, :destroy]
+  before_action :correct_user,         only: [:edit, :update]
+  before_action :admin_user,           only: :destroy
+  before_action :only_signed_out_user, only: [:create, :new]
   
   def index
     store_users_page
@@ -60,6 +61,10 @@ class UsersController < ApplicationController
         store_location
         redirect_to signin_url, notice: "Please sign in."
       end 
+    end
+    
+    def only_signed_out_user
+      redirect_to root_url if signed_in?
     end
     
     def correct_user

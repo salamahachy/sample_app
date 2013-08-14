@@ -3,6 +3,7 @@ require 'spec_helper'
 describe "Authentication" do
   
   subject { page }
+  let(:user) { FactoryGirl.create(:user) }
   
   describe "signin page" do
     before { visit signin_path }
@@ -28,7 +29,6 @@ describe "Authentication" do
     end
     
     describe "with valid information" do
-      let(:user) { FactoryGirl.create(:user) }
       before { sign_in user }
       
       it { should have_title(user.name) }
@@ -49,7 +49,6 @@ describe "Authentication" do
   describe "authorization" do
     
     describe "for non-signend-in users" do
-      let(:user) { FactoryGirl.create(:user) }
       
       describe "when attempting to visit a protected parge" do
         before do
@@ -88,7 +87,6 @@ describe "Authentication" do
     end
     
     describe "as wrong user" do
-      let(:user) { FactoryGirl.create(:user) }
       let(:wrong_user) { FactoryGirl.create(:user, email: "wrong@example.com") }
       before { sign_in user, no_capybara: true }
 
@@ -101,6 +99,32 @@ describe "Authentication" do
         before { patch user_path(wrong_user) }
         specify { expect(response).to redirect_to(root_url) }
       end
+    end
+    
+        
+    describe "as signed in user" do
+      
+      describe "trying to sign up" do
+        before do
+          sign_in user
+          visit signup_path 
+        end
+        
+        it { should_not have_title('Sign up') }
+        it "should redirect to the root_url" do
+          expect(current_url).to eq root_url
+        end
+      end
+      
+      describe "submitting a POST request to the User#create action" do
+        let(:new_user) { FactoryGirl.create(:user) }
+        before do 
+          sign_in user, no_capybara: true
+          post users_path(new_user)
+        end
+         
+        specify { expect(response).to redirect_to(root_url) }
+      end              
     end
   end
 end

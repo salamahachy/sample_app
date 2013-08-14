@@ -46,6 +46,15 @@ describe "User Pages" do
         end
         it { should_not have_link('delete', href: user_path(admin))}
         
+        describe "should not be able to delete himself" do
+          before do
+            sign_in admin, no_capybara: true
+            delete user_path(admin)
+          end
+          
+          it { expect{ User.find_by(email: admin.email) }.to_not be_nil }
+        end
+        
         describe "deleting user on page x" do
           before { click_link('2', match: :first) }
           
@@ -76,6 +85,7 @@ describe "User Pages" do
     
     it { should have_content('Sign up') }
     it { should have_title(full_title('Sign up')) }
+
   end
   
   describe "signup" do
@@ -116,6 +126,7 @@ describe "User Pages" do
         it { should have_title(user.name) }
         it { should have_selector('div.alert.alert-success', text: 'Welcome') }
       end
+      
       
     end
   end
