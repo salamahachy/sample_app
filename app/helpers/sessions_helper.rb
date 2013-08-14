@@ -36,4 +36,13 @@ module SessionsHelper
   def store_location
     session[:return_to] = request.url
   end
+  
+  def store_users_page
+    session[:return_to_user_page] = params[:page]
+  end
+  
+  def redirect_to_users_page
+    redirect_to users_url(page: session[:return_to_user_page])
+    session.delete(:return_to_user_page)
+  end
 end

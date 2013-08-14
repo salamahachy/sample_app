@@ -6,17 +6,17 @@ describe "User Pages" do
   
   describe "index" do
     let(:user) { FactoryGirl.create(:user) }
+    before(:all) { 31.times { FactoryGirl.create(:user) } }
     before(:each) do
       sign_in user
       visit users_path
     end
+    after(:all) { User.delete_all }
     
     it { should have_title('All users') }
     it { should have_content('All users') }
     
     describe "pagnination" do
-      before(:all) { 30.times { FactoryGirl.create(:user) } }
-      after(:all) { User.delete_all }
       
       it { should have_selector('div.pagination') }
       
@@ -45,6 +45,16 @@ describe "User Pages" do
           end.to change(User, :count).by(-1)
         end
         it { should_not have_link('delete', href: user_path(admin))}
+        
+        describe "deleting user on page x" do
+          before { click_link('2', match: :first) }
+          
+          specify { expect(current_url).to eq users_url(page: 2) }
+          describe "should redirect to the same page" do
+            before { click_link('delete', match: :first) }
+            specify { expect(current_url).to eq users_url(page: 2) }
+          end
+        end
       end 
       
       describe "as non-admin user" do
