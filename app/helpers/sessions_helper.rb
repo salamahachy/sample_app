@@ -28,6 +28,13 @@ module SessionsHelper
     user == @current_user
   end
   
+  def signed_in_user
+    unless signed_in?
+      store_location
+      redirect_to signin_url, notice: "Please sign in."
+    end 
+  end
+  
   def redirect_back_or(default)
     redirect_to(session[:return_to] || default)
     session.delete(:return_to)
@@ -38,11 +45,21 @@ module SessionsHelper
   end
   
   def store_users_page
-    session[:return_to_user_page] = params[:page]
+    session[:users_page] = params[:page]
   end
   
   def redirect_to_users_page
-    redirect_to users_url(page: session[:return_to_user_page])
-    session.delete(:return_to_user_page)
+    redirect_to users_url(page: session[:users_page])
+    session.delete(:users_page)
+  end
+  
+  def store_feed_page
+    session[:feed_page] = params[:page]
+  end
+  
+  def load_feed_page
+    page = session[:feed_page]
+    session.delete(:feed_page)
+    page
   end
 end
